@@ -11,6 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -24,11 +25,13 @@
 #include "shmem.h"
 
 int main(int argc, char **argv) {
+    // Wrong number of arguments
     if (argc != 8) {
         fprintf(stderr, "Usage: %s <id> <capacity> <duration_ms> <shm_key> <msg_key> <SEM_SHM> <SEM_LOG>\n", argv[0]);
         return 1;
     }
 
+    // Get id, capacity, duration, keys, and sem names
     int id = atoi(argv[1]);
     int capacity = atoi(argv[2]);
     int duration = atoi(argv[3]);
@@ -37,27 +40,33 @@ int main(int argc, char **argv) {
     const char *SEM_SHM_NAME = argv[6];
     const char *SEM_LOG_NAME = argv[7];
 
-    // Attach to shared memory
-    int shmid = Shmget(shmkey, SHMEM_SIZE, 0600);
+    // Get and attach to shared memory
+    int shmid = Shmget(shmkey, SHMEM_SIZE, S_IRUSR | S_IWUSR);
     shData *shm  = (shData*)Shmat(shmid, NULL, 0);
 
-    int msgid = Msgget(msgkey, 0600);
+    // Get message queue
+    int msgid = Msgget(msgkey, S_IRUSR | S_IWUSR);
 
-    // named semaphores
+    // Named semaphores
     sem_t *sem_shm = Sem_open2(SEM_SHM_NAME, 0);
     sem_t *sem_log = Sem_open2(SEM_LOG_NAME, 0);
 
+    // Start factory
     Sem_wait(sem_log);
-    printf("Factory # %2d: STARTED.  My Capacity = %3d, in %4d milliSeconds\n", id, capacity, duration);
+    printf("Factory # %2d: STARTED. My Capacity = %3d, in %4d milliSeconds\n", id, capacity, duration);
     fflush(stdout);
     Sem_post(sem_log);
 
+    // Iterations and total
     int iterations = 0;
     int total_made_by_me = 0;
 
+    // Make parts, print stdout and send production
+    // message to supervisor via message queue
     for (;;) {
         int to_make = 0;
 
+        // Mutual exclusion
         Sem_wait(sem_shm);
         if (shm->remain > 0) {
             to_make = (shm->remain >= capacity) ? capacity : shm->remain;
@@ -66,18 +75,20 @@ int main(int argc, char **argv) {
         }
         Sem_post(sem_shm);
 
+        // Done
         if (to_make == 0)
             break;
 
         // Log to the shared factory.log
         Sem_wait(sem_log);
-        printf("Factory # %2d: Going to make %3d parts in %4d milliSecs\n", id, to_make, duration);
+        printf("Factory # %2d: Going to make   %3d parts in %4d milliSecs\n", id, to_make, duration);
         fflush(stdout);
         Sem_post(sem_log);
 
+        // Sleep for duration
         Usleep((useconds_t)duration * 1000);
 
-        // message to supervisor
+        // Message to supervisor
         msgBuf m;
         m.mtype = 1;
         m.purpose = PRODUCTION_MSG;
@@ -89,11 +100,12 @@ int main(int argc, char **argv) {
             perror("factory msgsnd(PRODUCTION)");
         }
 
+        // Increment iterations and add to total
         iterations++;
         total_made_by_me += to_make;
     }
 
-    // completion
+    // Completion, send one final message to supervisor
     msgBuf done;
     memset(&done, 0, sizeof(done));
     done.mtype = 1;
@@ -103,11 +115,17 @@ int main(int argc, char **argv) {
         perror("factory msgsnd(COMPLETION)");
     }
 
+    // Done
     Sem_wait(sem_log);
-    printf(">>> Factory # %2d: Terminating after making total of %4d parts in %3d iterations\n", id, total_made_by_me, iterations);
+    printf(">>> Factory #  %2d: Terminating after making total of %4d parts in %3d iterations\n", id, total_made_by_me, iterations);
     fflush(stdout);
     Sem_post(sem_log);
 
+    // Close semaphores
+    Sem_close(sem_shm);
+    Sem_close(sem_log);
+
+    // Detach shared memory
     Shmdt(shm);
     return 0;
 }

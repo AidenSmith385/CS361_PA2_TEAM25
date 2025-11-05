@@ -1,0 +1,38 @@
+
+SUPERVISOR: Started
+SUPERVISOR: Factory #  4 produced   28 parts in  563 milliSecs
+SUPERVISOR: Factory #  5 produced   49 parts in  798 milliSecs
+SUPERVISOR: Factory #  1 produced   46 parts in 1021 milliSecs
+SUPERVISOR: Factory #  3 produced   37 parts in 1079 milliSecs
+SUPERVISOR: Factory #  2 produced   17 parts in 1115 milliSecs
+SUPERVISOR: Factory #  4 produced   28 parts in  563 milliSecs
+SUPERVISOR: Factory #  5 produced   49 parts in  798 milliSecs
+SUPERVISOR: Factory #  4 produced   28 parts in  563 milliSecs
+SUPERVISOR: Factory #  1 produced   46 parts in 1021 milliSecs
+SUPERVISOR: Factory #  3 produced   37 parts in 1079 milliSecs
+SUPERVISOR: Factory #  2 produced   17 parts in 1115 milliSecs
+SUPERVISOR: Factory #  4 produced   28 parts in  563 milliSecs
+SUPERVISOR: Factory #  5 produced   49 parts in  798 milliSecs
+SUPERVISOR: Factory #  4 produced   28 parts in  563 milliSecs
+SUPERVISOR: Factory #  1 produced   46 parts in 1021 milliSecs
+SUPERVISOR: Factory #  5 produced   49 parts in  798 milliSecs
+SUPERVISOR: Factory #  5        COMPLETED its task
+SUPERVISOR: Factory #  3 produced   37 parts in 1079 milliSecs
+SUPERVISOR: Factory #  3        COMPLETED its task
+SUPERVISOR: Factory #  2 produced   17 parts in 1115 milliSecs
+SUPERVISOR: Factory #  2        COMPLETED its task
+SUPERVISOR: Factory #  4 produced   28 parts in  563 milliSecs
+SUPERVISOR: Factory #  4        COMPLETED its task
+SUPERVISOR: Factory #  1 produced   36 parts in 1021 milliSecs
+SUPERVISOR: Factory #  1        COMPLETED its task
+
+SUPERVISOR: Manufacturing is complete. Awaiting permission to print final report
+
+****** SUPERVISOR: Final Report ******
+Factory #  1 made a total of  174 parts in     4 iterations
+Factory #  2 made a total of   51 parts in     3 iterations
+Factory #  3 made a total of  111 parts in     3 iterations
+Factory #  4 made a total of  168 parts in     6 iterations
+Factory #  5 made a total of  196 parts in     4 iterations
+==============================
+Grand total parts made =   700   vs  order size of   700
